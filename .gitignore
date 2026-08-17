@@ -1,0 +1,18 @@
+# Ignore local user uploads and generated outputs
+/uploads/*
+/outputs/*
+!/uploads/.gitkeep
+!/outputs/.gitkeep
+
+# Ignore temporary extracted files
+/python_scripts/extracted_files/
+
+# Ignore local databases and history files
+*.db
+*.sqlite
+history.txt
+
+# Ignore IDE / environment settings
+.vscode/
+.idea/
+.DS_Store

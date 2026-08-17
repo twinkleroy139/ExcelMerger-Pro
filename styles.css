@@ -1,0 +1,25 @@
+/* styles.css */
+@keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(1000%); }
+}
+
+.scanline {
+    animation: scanline 3s linear infinite;
+}
+
+/* Custom Scrollbar for Terminal Sections */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #111827;
+}
+::-webkit-scrollbar-thumb {
+    background: #0e7490;
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #06b6d4;
+}

@@ -1,7 +1,7 @@
 # Use an official lightweight PHP image with Apache
 FROM php:8.2-apache
 
-# Install system dependencies, Python 3, and pre-compiled Pandas/Openpyxl via apt-get to avoid compilation errors
+# Install system dependencies, Python 3, and pre-compiled Pandas/Openpyxl
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y \
     python3-openpyxl \
     libsqlite3-dev \
     && rm -rf /var/lib/apt/lists/*
+
+# Create a symbolic link so 'python' resolves to 'python3'
+RUN ln -s /usr/bin/python3 /usr/bin/python
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite

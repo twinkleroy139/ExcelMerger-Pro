@@ -1,31 +1,32 @@
-# 🚀 ExcelMerger Pro v2.6
+# 🚀 ExcelMerger Pro v2.6 (Live Production)
 
-ExcelMerger Pro is a high-performance batch processing web application designed to merge thousands of individual Excel sheets from a single ZIP archive, align headers, filter duplicates, and compile a clean master spreadsheet.
+[![Live Demo](https://img.shields.io/badge/Status-Live%20Online-cyan?style=for-the-badge&logo=render)](https://excelmerger-pro.onrender.com)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=for-the-badge)](LICENSE)
 
-It features a **Cyberpunk Diagnostic UI**, user-isolated local history tracking via **SQLite**, a public feedback terminal, and a secure Python/Pandas backend parsing engine.
+**ExcelMerger Pro** is a high-performance, containerized full-stack web application designed to process, align, filter, and compile thousands of Excel sheets from a single ZIP archive instantly.
 
----
-
-## ✨ Key Features
-* **High-Speed Batch Processing:** Powered by Python (`pandas` & `openpyxl`) to handle large datasets effortlessly.
-* **Cyberpunk Terminal Loader:** Interactive, real-time diagnostic progress animation with dynamic speed and chunk monitoring.
-* **User-Isolated Storage:** Logged-in users have private access to their execution history logs, while guest users can process files safely in session mode without leaving server footprints.
-* **Feedback & Rating Terminal:** Integrated comment box and star-rating system to capture user notes and contact emails securely.
-* **Zero Leak Security:** Configured with robust `.gitignore` rules to keep database files, active uploads, and private logs away from public version control.
+🌐 **Access the Live Web App Here:** [https://excelmerger-pro.onrender.com](https://excelmerger-pro.onrender.com)
 
 ---
 
-## 🛠️ Tech Stack
-* **Frontend:** HTML5, Tailwind CSS, Custom CSS (Scanline animations)
-* **Backend:** PHP (Session management, routing, database handlers)
-* **Database:** SQLite (Serverless, zero-configuration local data store)
+## ✨ Core Features
+* **Cyberpunk Diagnostic UI:** Immersive, real-time animated status terminal tracking progress, speed, and data chunks.
+* **Dual Access Architecture:** 
+  * **Guest Mode:** Instant file processing and merging without server-side persistent footprint.
+  * **User Account Mode:** Secure registration/login system with persistent, user-isolated history logs backed by SQLite.
+* **Public Feedback Terminal:** Interactive star-rating and comment submission box accessible to all visitors.
+* **Robust Backend Parser:** Powered by a locked Python/Pandas core engine ensuring absolute data integrity.
+
+---
+
+## 🛠️ Technology Stack
+* **Frontend:** HTML5, Tailwind CSS, Custom Scanline CSS
+* **Backend:** PHP 8.2 (Session management, routing, database handlers)
 * **Processing Engine:** Python 3 + Pandas + Openpyxl
+* **Database:** SQLite
+* **Hosting & Containerization:** Docker on Render Cloud
 
 ---
 
-## ⚙️ Installation & Local Setup
-
-1. **Clone the repository:**
-   ```bash
-   git clone [https://github.com/twinkleroy139/ExcelMerger-Pro.git](https://github.com/twinkleroy139/ExcelMerger-Pro.git)
-   cd ExcelMerger-Pro
+## 📄 License
+This project is open-source under the **Apache License 2.0**. See the [LICENSE](LICENSE) file for details.

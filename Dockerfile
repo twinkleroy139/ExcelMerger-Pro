@@ -1,7 +1,7 @@
 # Use an official lightweight PHP image with Apache
 FROM php:8.2-apache
 
-# Install system dependencies, Python 3, and pip
+# Install system dependencies, Python 3, and pre-compiled Pandas/Openpyxl via apt-get to avoid compilation errors
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     libsqlite3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Enable Apache mod_rewrite if needed
+# Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
 # Set working directory inside container
@@ -18,9 +18,6 @@ WORKDIR /var/www/html
 
 # Copy project files into the container
 COPY . /var/www/html/
-
-# Install any extra python requirements if present
-RUN if [ -f python_scripts/requirements.txt ]; then pip3 install --no-cache-dir -r python_scripts/requirements.txt --break-system-packages; fi
 
 # Create required writable directories and set permissions
 RUN mkdir -p database outputs uploads \

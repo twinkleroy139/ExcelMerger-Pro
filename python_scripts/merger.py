@@ -4,6 +4,7 @@ import zipfile
 import pandas as pd
 import glob
 import json
+import gc
 
 def merge_excel_zip(zip_path, output_path):
     extract_dir = os.path.join(os.path.dirname(output_path), 'extracted_files')
@@ -14,7 +15,7 @@ def merge_excel_zip(zip_path, output_path):
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(extract_dir)
 
-        # 2. Find all valid .xlsx files (ignoring temporary files starting with ~$)
+        # 2. Find all valid .xlsx files (ignoring temp files starting with ~$)
         search_pattern = os.path.join(extract_dir, '**', '*.xlsx')
         all_files = [f for f in glob.glob(search_pattern, recursive=True) if not os.path.basename(f).startswith('~$')]
 
@@ -26,45 +27,57 @@ def merge_excel_zip(zip_path, output_path):
         master_headers = []
         file_dataframes = []
 
-        # Pass 1: Discover universal headers across all files and collect dataframes
+        # Pass 1: Discover universal headers across all files
+        for file in all_files:
+            try:
+                # Read only headers and first few rows or use low-memory options
+                df = pd.read_excel(file, nrows=0)
+                df.columns = [str(col).strip() for col in df.columns]
+                for col in df.columns:
+                    if col not in master_headers:
+                        master_headers.append(col)
+            except Exception:
+                continue
+
+        if not master_headers:
+            print(json.dumps({"status": "error", "message": "Could not extract any valid headers."}))
+            sys.exit(1)
+
+        # Pass 2: Read dataframes and align them incrementally to save RAM
         for file in all_files:
             try:
                 df = pd.read_excel(file)
                 if df.empty:
                     continue
                 
-                # Clean column names (strip whitespace)
                 df.columns = [str(col).strip() for col in df.columns]
                 
-                # Remove any accidental duplicate header rows embedded inside the data
-                # (e.g. if a row's values match its column names)
+                # Filter out accidental duplicate header rows
                 for col in df.columns:
-                    df = df[df[col].astype(str).str.strip().str.lower() != col.lower()]
+                    if col in df.columns:
+                        df = df[df[col].astype(str).str.strip().str.lower() != col.lower()]
 
                 if len(df) > 0:
                     total_input_rows += len(df)
-                    file_dataframes.append(df)
-                    
-                    for col in df.columns:
-                        if col not in master_headers:
-                            master_headers.append(col)
-            except Exception as e:
+                    # Reindex immediately to master headers
+                    df_aligned = df.reindex(columns=master_headers)
+                    file_dataframes.append(df_aligned)
+                
+                # Force garbage collection per file iteration to conserve RAM
+                del df
+                gc.collect()
+            except Exception:
                 continue
 
-        if not master_headers or not file_dataframes:
-            print(json.dumps({"status": "error", "message": "Could not extract any valid data or headers."}))
+        if not file_dataframes:
+            print(json.dumps({"status": "error", "message": "Could not extract any valid data."}))
             sys.exit(1)
 
-        # Pass 2: Align every dataframe to the exact universal master headers list
-        aligned_dfs = []
-        for df in file_dataframes:
-            # Reindex adds missing columns automatically filled with NaN (blank)
-            df_aligned = df.reindex(columns=master_headers)
-            aligned_dfs.append(df_aligned)
-
         # Concatenate all into a single master dataframe
-        master_df = pd.concat(aligned_dfs, ignore_index=True)
-        
+        master_df = pd.concat(file_dataframes, ignore_index=True)
+        del file_dataframes
+        gc.collect()
+
         # Drop completely empty rows if any
         master_df.dropna(how='all', inplace=True)
 
@@ -93,8 +106,9 @@ def merge_excel_zip(zip_path, output_path):
             for name in dirs:
                 try: os.rmdir(os.path.join(root, name))
                 except: pass
-        try: os.rmdir(extract_dir)
-        except: pass
+            try: os.rmdir(extract_dir)
+            except: pass
+        gc.collect()
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:

@@ -13,6 +13,9 @@ RUN apt-get update && apt-get install -y \
 # Create a symbolic link so 'python' resolves to 'python3'
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
+# Copy custom PHP upload limits configuration
+COPY uploads.ini /usr/local/etc/php/conf.d/uploads.ini
+
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
 

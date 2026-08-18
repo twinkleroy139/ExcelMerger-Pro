@@ -1,9 +1,9 @@
 <?php
 // upload.php
 require_once __DIR__ . '/includes/auth.php';
-set_time_limit(0); // Allow script to run indefinitely for massive file batches
+set_time_limit(0); // Allow script to run indefinitely for massive file batches[cite: 12]
 
-$userId = getCurrentUserId(); // null if guest, integer if logged in
+$userId = getCurrentUserId(); // null if guest, integer if logged in[cite: 12]
 
 // Handle Feedback Submission (if posted from dashboard)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'submit_feedback') {
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['zip_file'])) {
         $command = escapeshellcmd("python \"$pythonScript\" \"$zipPath\" \"$outputPath\"");
         $output = shell_exec($command . " 2>&1");
 
-        @unlink($zipPath); // Clean up temporary zip archive
+        @unlink($zipPath); // Clean up temporary zip archive[cite: 12]
 
         $data = json_decode(trim($output), true);
 

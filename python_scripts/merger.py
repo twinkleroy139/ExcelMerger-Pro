@@ -17,6 +17,7 @@ def merge_excel_zip(zip_path, output_path):
         # 2. Find all valid Excel files case-insensitively (ignoring temp files starting with ~$)
         all_files = []
         for root, dirs, files in os.walk(extract_dir):
+            print(f"DEBUG DIR: {root} | FILES: {files}")
             for file in files:
                 if file.lower().endswith(('.xlsx', '.xls')) and not file.startswith('~$'):
                     all_files.append(os.path.join(root, file))

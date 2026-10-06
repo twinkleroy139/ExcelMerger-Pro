@@ -2,7 +2,6 @@ import os
 import sys
 import zipfile
 import pandas as pd
-import glob
 import json
 import gc
 
@@ -15,9 +14,12 @@ def merge_excel_zip(zip_path, output_path):
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(extract_dir)
 
-        # 2. Find all valid .xlsx files (ignoring temp files starting with ~$)
-        search_pattern = os.path.join(extract_dir, '**', '*.xlsx')
-        all_files = [f for f in glob.glob(search_pattern, recursive=True) if not os.path.basename(f).startswith('~$')]
+        # 2. Find all valid Excel files case-insensitively (ignoring temp files starting with ~$)
+        all_files = []
+        for root, dirs, files in os.walk(extract_dir):
+            for file in files:
+                if file.lower().endswith(('.xlsx', '.xls')) and not file.startswith('~$'):
+                    all_files.append(os.path.join(root, file))
 
         if not all_files:
             print(json.dumps({"status": "error", "message": "No valid Excel files found in the ZIP archive."}))

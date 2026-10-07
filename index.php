@@ -45,25 +45,29 @@ if ($isLoggedIn) {
 
             <?php if(isset($_GET['success'])): ?>
                 <div class="mb-6 bg-gray-900 border border-green-500/50 text-green-300 p-6 rounded-lg">
-                    <h3 class="font-bold text-sm text-green-400 mb-2">>> MERGE COMPLETED SUCCESSFULLY [200 OK]</h3>
-                    <div class="grid grid-cols-3 gap-4 my-4 text-xs bg-gray-800 p-4 rounded border border-green-500/20">
-                        <div>
-                            <span class="block text-gray-500">TOTAL FILES</span>
-                            <span class="font-bold text-base text-cyan-400"><?= htmlspecialchars($_GET['total_files']) ?></span>
-                        </div>
-                        <div>
-                            <span class="block text-gray-500">SOURCE ROWS</span>
-                            <span class="font-bold text-base text-gray-200"><?= htmlspecialchars($_GET['input_rows']) ?></span>
-                        </div>
-                        <div>
-                            <span class="block text-gray-500">MASTER ROWS</span>
-                            <span class="font-bold text-base text-green-400"><?= htmlspecialchars($_GET['output_rows']) ?></span>
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <a href="outputs/<?= htmlspecialchars($_GET['file']) ?>" class="inline-block bg-green-600 hover:bg-green-500 text-gray-950 font-bold px-5 py-2.5 rounded text-xs tracking-wider uppercase transition shadow">Download Master XLSX</a>
-                    </div>
-                </div>
+    <h3 class="font-bold text-sm text-green-400 mb-2">>> MERGE AUDIT REPORT COMPLETED [200 OK]</h3>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 my-4 text-xs bg-gray-800 p-4 rounded border border-green-500/20">
+        <div>
+            <span class="block text-gray-500">TOTAL FILES</span>
+            <span class="font-bold text-base text-cyan-400"><?= htmlspecialchars($_GET['total_files'] ?? 0) ?></span>
+        </div>
+        <div>
+            <span class="block text-gray-500">SOURCE ROWS</span>
+            <span class="font-bold text-base text-gray-200"><?= htmlspecialchars($_GET['input_rows'] ?? 0) ?></span>
+        </div>
+        <div>
+            <span class="block text-gray-500">DUPLICATES PURGED</span>
+            <span class="font-bold text-base text-yellow-400"><?= htmlspecialchars($_GET['duplicates_removed'] ?? 0) ?></span>
+        </div>
+        <div>
+            <span class="block text-gray-500">MASTER ROWS</span>
+            <span class="font-bold text-base text-green-400"><?= htmlspecialchars($_GET['output_rows'] ?? 0) ?></span>
+        </div>
+    </div>
+    <div class="mt-4">
+        <a href="outputs/<?= htmlspecialchars($_GET['file'] ?? '') ?>" class="inline-block bg-green-600 hover:bg-green-500 text-gray-950 font-bold px-5 py-2.5 rounded text-xs tracking-wider uppercase transition shadow">Download Master XLSX</a>
+    </div>
+</div>
             <?php endif; ?>
 
             <form action="upload.php" method="POST" enctype="multipart/form-data" class="space-y-6" onsubmit="showTerminalLoader()">

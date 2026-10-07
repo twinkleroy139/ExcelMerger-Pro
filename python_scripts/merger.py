@@ -98,11 +98,16 @@ def merge_excel_zip(zip_path, output_path):
         # Write out final combined results to Excel using openpyxl engine
         master_df.to_excel(output_path, index=False)
 
+        # Track skipped files during the loop if exceptions occur:
+        # Inside the except Exception block of file processing, append to a skipped_files list:
+        # skipped_files.append({"file": os.path.basename(file), "reason": str(e)})
+
         stats = {
             "status": "success",
             "total_files": len(all_files),
             "input_rows": total_input_rows,
             "output_rows": len(master_df),
+            "duplicates_removed": max(0, total_input_rows - len(master_df)),
             "output_file": os.path.basename(output_path)
         }
         print(json.dumps(stats))

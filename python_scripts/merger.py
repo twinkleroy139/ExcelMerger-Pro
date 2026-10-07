@@ -4,6 +4,7 @@ import zipfile
 import pandas as pd
 import json
 import gc
+from normalizer import normalize_columns
 
 def merge_excel_zip(zip_path, output_path):
     extract_dir = os.path.join(os.path.dirname(output_path), 'extracted_files')
@@ -33,20 +34,18 @@ def merge_excel_zip(zip_path, output_path):
         for file in all_files:
             try:
                 if file.lower().endswith('.csv'):
-                    # Handle CSV files gracefully with fallback encodings
                     try:
                         df = pd.read_csv(file, encoding='utf-8')
                     except UnicodeDecodeError:
                         df = pd.read_csv(file, encoding='latin1')
                 else:
-                    # Handle Excel spreadsheets
                     df = pd.read_excel(file)
 
                 if df.empty:
                     continue
                 
-                # Normalize column names
-                df.columns = [str(col).strip() for col in df.columns]
+                # Apply Header Normalization & Alias Mapping via modular helper
+                df.columns = normalize_columns(df.columns)
                 
                 # Filter out duplicate header rows inside data
                 for col in df.columns:
@@ -61,7 +60,6 @@ def merge_excel_zip(zip_path, output_path):
                         if col not in master_columns:
                             master_columns.append(col)
 
-                # Free local reference immediately
                 del df
                 gc.collect()
             except Exception:
@@ -100,7 +98,6 @@ def merge_excel_zip(zip_path, output_path):
         print(json.dumps({"status": "error", "message": str(e)}))
         sys.exit(1)
     finally:
-        # Thorough cleanup of extracted temporary files
         for root, dirs, files in os.walk(extract_dir, topdown=False):
             for name in files:
                 try: os.remove(os.path.join(root, name))

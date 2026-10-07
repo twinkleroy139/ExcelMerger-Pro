@@ -6,6 +6,7 @@ import json
 import gc
 from normalizer import normalize_columns
 from deduplicator import apply_deduplication
+from sheet_selector import load_excel_sheets
 
 
 def merge_excel_zip(zip_path, output_path):
@@ -32,6 +33,8 @@ def merge_excel_zip(zip_path, output_path):
         file_dataframes = []
         master_columns = []
 
+        
+
         # Single-pass reading: Collect dataframes from either Excel or CSV dynamically
         for file in all_files:
             try:
@@ -40,32 +43,37 @@ def merge_excel_zip(zip_path, output_path):
                         df = pd.read_csv(file, encoding='utf-8')
                     except UnicodeDecodeError:
                         df = pd.read_csv(file, encoding='latin1')
+                    dfs_to_process = [df] if not df.empty else []
                 else:
-                    df = pd.read_excel(file)
+                    # Use sheet selector helper (Defaulting to 'first' or 'all' sheets)
+                    dfs_to_process = load_excel_sheets(file, mode='first')
 
-                if df.empty:
-                    continue
-                
-                # Apply Header Normalization & Alias Mapping via modular helper
-                df.columns = normalize_columns(df.columns)
-                
-                # Filter out duplicate header rows inside data
-                for col in df.columns:
-                    df = df[df[col].astype(str).str.strip().str.lower() != col.lower()]
-
-                if len(df) > 0:
-                    total_input_rows += len(df)
-                    file_dataframes.append(df)
+                for df in dfs_to_process:
+                    if df.empty:
+                        continue
                     
-                    # Track all unique columns across files in order of appearance
+                    # Apply Header Normalization & Alias Mapping via modular helper
+                    df.columns = normalize_columns(df.columns)
+                    
+                    # Filter out duplicate header rows inside data
                     for col in df.columns:
-                        if col not in master_columns:
-                            master_columns.append(col)
+                        df = df[df[col].astype(str).str.strip().str.lower() != col.lower()]
 
-                del df
+                    if len(df) > 0:
+                        total_input_rows += len(df)
+                        file_dataframes.append(df)
+                        
+                        # Track all unique columns across files in order of appearance
+                        for col in df.columns:
+                            if col not in master_columns:
+                                master_columns.append(col)
+
+                del dfs_to_process
                 gc.collect()
             except Exception:
                 continue
+
+
 
         if not file_dataframes:
             print(json.dumps({"status": "error", "message": "Could not extract any valid data from the files."}))

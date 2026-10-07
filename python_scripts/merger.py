@@ -14,26 +14,34 @@ def merge_excel_zip(zip_path, output_path):
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(extract_dir)
 
-        # 2. Find all valid Excel files case-insensitively (ignoring temp files starting with ~$)
+        # 2. Find all valid spreadsheet & data files (.xlsx, .xls, .csv) case-insensitively
         all_files = []
         for root, dirs, files in os.walk(extract_dir):
-            print(f"DEBUG DIR: {root} | FILES: {files}")
             for file in files:
-                if file.lower().endswith(('.xlsx', '.xls')) and not file.startswith('~$'):
+                if file.lower().endswith(('.xlsx', '.xls', '.csv')) and not file.startswith('~$'):
                     all_files.append(os.path.join(root, file))
 
         if not all_files:
-            print(json.dumps({"status": "error", "message": "No valid Excel files found in the ZIP archive."}))
+            print(json.dumps({"status": "error", "message": "No valid Excel or CSV files found in the ZIP archive."}))
             sys.exit(1)
 
         total_input_rows = 0
         file_dataframes = []
         master_columns = []
 
-        # Single-pass reading: Collect dataframes while dynamically building a unified column list
+        # Single-pass reading: Collect dataframes from either Excel or CSV dynamically
         for file in all_files:
             try:
-                df = pd.read_excel(file)
+                if file.lower().endswith('.csv'):
+                    # Handle CSV files gracefully with fallback encodings
+                    try:
+                        df = pd.read_csv(file, encoding='utf-8')
+                    except UnicodeDecodeError:
+                        df = pd.read_csv(file, encoding='latin1')
+                else:
+                    # Handle Excel spreadsheets
+                    df = pd.read_excel(file)
+
                 if df.empty:
                     continue
                 
@@ -60,7 +68,7 @@ def merge_excel_zip(zip_path, output_path):
                 continue
 
         if not file_dataframes:
-            print(json.dumps({"status": "error", "message": "Could not extract any valid data from the Excel files."}))
+            print(json.dumps({"status": "error", "message": "Could not extract any valid data from the files."}))
             sys.exit(1)
 
         # Reindex all dataframes to match the master column set perfectly before concatenation
@@ -76,7 +84,7 @@ def merge_excel_zip(zip_path, output_path):
         # Drop completely empty rows
         master_df.dropna(how='all', inplace=True)
 
-        # Write out to Excel using openpyxl engine
+        # Write out final combined results to Excel using openpyxl engine
         master_df.to_excel(output_path, index=False)
 
         stats = {

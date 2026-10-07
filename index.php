@@ -3,16 +3,15 @@
 require_once __DIR__ . '/includes/auth.php';
 
 $isLoggedIn = isLoggedIn();
-$username = getCurrentUsername();
-$userId = getCurrentUserId();
+$username = getCurrentUsername();$userId = getCurrentUserId();
 
 // Fetch user-specific history if logged in
 $userHistory = [];
 if ($isLoggedIn) {
     global $pdo;
-    $stmt = $pdo->prepare("SELECT * FROM history WHERE user_id = ? ORDER BY created_at DESC LIMIT 10");
+    $stmt =$pdo->prepare("SELECT * FROM history WHERE user_id = ? ORDER BY created_at DESC LIMIT 10");
     $stmt->execute([$userId]);
-    $userHistory = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $userHistory =$stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 ?>
 <!DOCTYPE html>
@@ -41,33 +40,33 @@ if ($isLoggedIn) {
         
         <div class="bg-gray-800/80 border border-cyan-500/30 p-8 rounded-xl shadow-2xl backdrop-blur">
             <h2 class="text-xl font-bold mb-2 text-cyan-400 uppercase tracking-wide">Batch Processing Terminal</h2>
-            <p class="text-gray-400 mb-6 text-xs leading-relaxed">Upload your ZIP archive containing multiple Excel sheets. The core engine will align headers, filter duplicates, and compile the master file securely.</p>
+            <p class="text-gray-400 mb-6 text-xs leading-relaxed">Upload your ZIP archive containing multiple Excel sheets or CSVs. The core engine will normalize headers, filter duplicates, and compile the master file securely.</p>
 
             <?php if(isset($_GET['success'])): ?>
                 <div class="mb-6 bg-gray-900 border border-green-500/50 text-green-300 p-6 rounded-lg">
-    <h3 class="font-bold text-sm text-green-400 mb-2">>> MERGE AUDIT REPORT COMPLETED [200 OK]</h3>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 my-4 text-xs bg-gray-800 p-4 rounded border border-green-500/20">
-        <div>
-            <span class="block text-gray-500">TOTAL FILES</span>
-            <span class="font-bold text-base text-cyan-400"><?= htmlspecialchars($_GET['total_files'] ?? 0) ?></span>
-        </div>
-        <div>
-            <span class="block text-gray-500">SOURCE ROWS</span>
-            <span class="font-bold text-base text-gray-200"><?= htmlspecialchars($_GET['input_rows'] ?? 0) ?></span>
-        </div>
-        <div>
-            <span class="block text-gray-500">DUPLICATES PURGED</span>
-            <span class="font-bold text-base text-yellow-400"><?= htmlspecialchars($_GET['duplicates_removed'] ?? 0) ?></span>
-        </div>
-        <div>
-            <span class="block text-gray-500">MASTER ROWS</span>
-            <span class="font-bold text-base text-green-400"><?= htmlspecialchars($_GET['output_rows'] ?? 0) ?></span>
-        </div>
-    </div>
-    <div class="mt-4">
-        <a href="outputs/<?= htmlspecialchars($_GET['file'] ?? '') ?>" class="inline-block bg-green-600 hover:bg-green-500 text-gray-950 font-bold px-5 py-2.5 rounded text-xs tracking-wider uppercase transition shadow">Download Master XLSX</a>
-    </div>
-</div>
+                    <h3 class="font-bold text-sm text-green-400 mb-2">>> MERGE AUDIT REPORT COMPLETED [200 OK]</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 my-4 text-xs bg-gray-800 p-4 rounded border border-green-500/20">
+                        <div>
+                            <span class="block text-gray-500">TOTAL FILES</span>
+                            <span class="font-bold text-base text-cyan-400"><?= htmlspecialchars($_GET['total_files'] ?? 0) ?></span>
+                        </div>
+                        <div>
+                            <span class="block text-gray-500">SOURCE ROWS</span>
+                            <span class="font-bold text-base text-gray-200"><?= htmlspecialchars($_GET['input_rows'] ?? 0) ?></span>
+                        </div>
+                        <div>
+                            <span class="block text-gray-500">DUPLICATES PURGED</span>
+                            <span class="font-bold text-base text-yellow-400"><?= htmlspecialchars($_GET['duplicates_removed'] ?? 0) ?></span>
+                        </div>
+                        <div>
+                            <span class="block text-gray-500">MASTER ROWS</span>
+                            <span class="font-bold text-base text-green-400"><?= htmlspecialchars($_GET['output_rows'] ?? 0) ?></span>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="outputs/<?= htmlspecialchars($_GET['file'] ?? '') ?>" class="inline-block bg-green-600 hover:bg-green-500 text-gray-950 font-bold px-5 py-2.5 rounded text-xs tracking-wider uppercase transition shadow">Download Master XLSX</a>
+                    </div>
+                </div>
             <?php endif; ?>
 
             <form action="upload.php" method="POST" enctype="multipart/form-data" class="space-y-6" onsubmit="showTerminalLoader()">
@@ -131,7 +130,7 @@ if ($isLoggedIn) {
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-700/50 text-gray-300">
-                            <?php foreach($userHistory as $row): ?>
+                            <?php foreach($userHistory as$row): ?>
                             <tr>
                                 <td class="py-2"><?= htmlspecialchars($row['created_at']) ?></td>
                                 <td class="py-2 text-cyan-400"><?= htmlspecialchars($row['total_files']) ?></td>
@@ -153,7 +152,7 @@ if ($isLoggedIn) {
             <h3 class="text-sm font-semibold mb-2 text-cyan-400 uppercase tracking-wide">Feedback & Rating Terminal</h3>
             <p class="text-xs text-gray-400 mb-4">Leave a rating and comment about your experience with ExcelMerger Pro.</p>
 
-            <?php if(isset($_GET['feedback']) && $_GET['feedback'] === 'success'): ?>
+            <?php if(isset($_GET['feedback']) &&$_GET['feedback'] === 'success'): ?>
                 <div class="mb-4 bg-green-950/50 border border-green-500 text-green-300 p-3 rounded text-xs">
                     >> Feedback submitted successfully. Thank you!
                 </div>

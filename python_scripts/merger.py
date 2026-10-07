@@ -5,6 +5,8 @@ import pandas as pd
 import json
 import gc
 from normalizer import normalize_columns
+from deduplicator import apply_deduplication
+
 
 def merge_excel_zip(zip_path, output_path):
     extract_dir = os.path.join(os.path.dirname(output_path), 'extracted_files')
@@ -78,6 +80,9 @@ def merge_excel_zip(zip_path, output_path):
         master_df = pd.concat(aligned_dfs, ignore_index=True)
         del aligned_dfs
         gc.collect()
+
+        # Apply Advanced Deduplication
+        master_df = apply_deduplication(master_df, mode='full-row', keep_option='first')
 
         # Drop completely empty rows
         master_df.dropna(how='all', inplace=True)

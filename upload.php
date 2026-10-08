@@ -1,28 +1,11 @@
 <?php
 // upload.php
 require_once __DIR__ . '/includes/auth.php';
-require_once __DIR__ . '/includes/security_tokens.php'; // Step 7: Include secure token helper
-set_time_limit(0); // Allow script to run indefinitely for massive file batches[cite: 5, 10]
+require_once __DIR__ . '/includes/security_tokens.php';
+set_time_limit(0);
 
-$userId = getCurrentUserId(); // null if guest, integer if logged in[cite: 5, 10]
+$userId = getCurrentUserId();
 
-// Handle Feedback Submission (if posted from dashboard)
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'submit_feedback') {
-    global $pdo;
-    $name = trim($_POST['feedback_name'] ?? 'Anonymous');
-    $email = trim($_POST['feedback_email'] ?? '');
-    $rating = intval($_POST['feedback_rating'] ?? 5);
-    $comment = trim($_POST['feedback_comment'] ?? '');
-
-    if (!empty($comment)) {
-        $stmt = $pdo->prepare("INSERT INTO feedbacks (name, email, rating, comment) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$name, $email, $rating, $comment]);
-    }
-    header('Location: index.php?feedback=success');
-    exit;
-}
-
-// Handle File Upload & Merge Execution
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['zip_file'])) {
     $uploadDir = __DIR__ . '/uploads/';
     $outputDir = __DIR__ . '/outputs/';
@@ -32,26 +15,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['zip_file'])) {
 
     $fileName = time() . '_' . basename($_FILES['zip_file']['name']);
     $zipPath = $uploadDir . $fileName;
-    $outputFileName = 'Master_Output_' . time() . '.xlsx';
+    $outputFileName = 'Master_Output_' . time();
     $outputPath = $outputDir . $outputFileName;
 
-    // Grab export format from form request (defaults to 'xlsx')[cite: 10]
+    // Capture UI form options
     $exportFormat = $_POST['export_format'] ?? 'xlsx';
+    $sheetMode = $_POST['sheet_mode'] ?? 'first';
+    $dedupMode = $_POST['dedup_mode'] ?? 'full-row';
 
     if (move_uploaded_file($_FILES['zip_file']['tmp_name'], $zipPath)) {
         $pythonScript = __DIR__ . '/python_scripts/merger.py';
         
-        // Pass zipPath, outputPath, and exportFormat as command-line arguments to Python[cite: 10]
+        // Command execution passing format arguments
         $command = escapeshellcmd("python \"$pythonScript\" \"$zipPath\" \"$outputPath\" \"$exportFormat\"");
         $output = shell_exec($command . " 2>&1");
 
-        @unlink($zipPath); // Clean up temporary zip archive[cite: 5, 10]
+        @unlink($zipPath);
 
         $data = json_decode(trim($output), true);
 
         if ($data && isset($data['status']) && $data['status'] === 'success') {
             
-            // Only save history if the user is logged in (User-isolated storage)[cite: 5, 10]
             if ($userId) {
                 global $pdo;
                 $logStmt = $pdo->prepare("INSERT INTO history (user_id, total_files, input_rows, output_rows, output_file) VALUES (?, ?, ?, ?, ?)");
@@ -64,7 +48,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['zip_file'])) {
                 ]);
             }
 
-            // Step 7: Generate a secure expiring download token instead of direct file disclosure
             $downloadToken = generate_secure_download_token($data['output_file'], $userId);
 
             $params = http_build_query([

@@ -18,13 +18,13 @@ if ($isLoggedIn) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ExcelMerger Pro - Dashboard</title>
+    <title>ExcelMerger Pro - Upgraded Cyberpunk Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-gray-900 min-h-screen text-gray-100 font-mono">
     <nav class="bg-gray-800 border-b border-cyan-500/30 text-cyan-400 p-4 shadow flex justify-between items-center px-8">
-        <h1 class="text-xl font-bold tracking-wider">EXCEL_MERGER_PRO // v2.6</h1>
+        <h1 class="text-xl font-bold tracking-wider">EXCEL_MERGER_PRO // v3.0 [ENTERPRISE]</h1>
         <div>
             <?php if($isLoggedIn): ?>
                 <span class="mr-4 text-xs">USER: <strong><?= htmlspecialchars($username) ?></strong></span>
@@ -36,11 +36,11 @@ if ($isLoggedIn) {
         </div>
     </nav>
 
-    <div class="max-w-3xl mx-auto mt-10 p-4 space-y-8">
+    <div class="max-w-4xl mx-auto mt-10 p-4 space-y-8">
         
         <div class="bg-gray-800/80 border border-cyan-500/30 p-8 rounded-xl shadow-2xl backdrop-blur">
-            <h2 class="text-xl font-bold mb-2 text-cyan-400 uppercase tracking-wide">Batch Processing Terminal</h2>
-            <p class="text-gray-400 mb-6 text-xs leading-relaxed">Upload your ZIP archive containing multiple Excel sheets or CSVs. The core engine will normalize headers, filter duplicates, and compile the master file securely.</p>
+            <h2 class="text-xl font-bold mb-2 text-cyan-400 uppercase tracking-wide">Enterprise Batch Processing Terminal</h2>
+            <p class="text-gray-400 mb-6 text-xs leading-relaxed">Configure your merge parameters below. The modular engine will normalize headers, apply custom deduplication rules, process sheet layouts, and compile your master dataset securely.</p>
 
             <?php if(isset($_GET['success'])): ?>
                 <div class="mb-6 bg-gray-900 border border-green-500/50 text-green-300 p-6 rounded-lg">
@@ -64,18 +64,74 @@ if ($isLoggedIn) {
                         </div>
                     </div>
                     <div class="mt-4">
-                        <a href="download.php?token=<?= htmlspecialchars($_GET['token'] ?? '') ?>" class="inline-block bg-green-600 hover:bg-green-500 text-gray-950 font-bold px-5 py-2.5 rounded text-xs tracking-wider uppercase transition shadow">Download Master File (Secure)</a>
+                        <a href="download.php?token=<?= htmlspecialchars($_GET['token'] ?? '') ?>" class="inline-block bg-green-600 hover:bg-green-500 text-gray-950 font-bold px-5 py-2.5 rounded text-xs tracking-wider uppercase transition shadow">Download Master File (Secure Token)</a>
                     </div>
                 </div>
             <?php endif; ?>
 
             <form action="upload.php" method="POST" enctype="multipart/form-data" class="space-y-6" onsubmit="showTerminalLoader()">
-                <div class="border-2 border-dashed border-cyan-500/30 p-6 rounded-lg text-center bg-gray-900/50 hover:border-cyan-400 transition">
-                    <input type="file" name="zip_file" accept=".zip" required class="block w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-bold file:bg-cyan-950 file:text-cyan-300 hover:file:bg-cyan-900 cursor-pointer">
+                
+                <!-- 1. Payload Upload Zone -->
+                <div class="space-y-2">
+                    <label class="block text-xs text-cyan-300 font-bold uppercase tracking-wider">1. Payload Archive (.zip)</label>
+                    <div class="border-2 border-dashed border-cyan-500/30 p-6 rounded-lg text-center bg-gray-900/50 hover:border-cyan-400 transition">
+                        <input type="file" name="zip_file" accept=".zip" required class="block w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-bold file:bg-cyan-950 file:text-cyan-300 hover:file:bg-cyan-900 cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- 2. Pipeline Configuration Options -->
+                <div class="bg-gray-900/70 border border-cyan-500/20 p-6 rounded-lg space-y-4">
+                    <h3 class="text-xs font-bold text-cyan-400 uppercase tracking-widest border-b border-cyan-500/20 pb-2">2. Pipeline Configuration Panel</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <div>
+                            <label class="block text-gray-400 mb-1">Export Format</label>
+                            <select name="export_format" class="w-full bg-gray-800 border border-cyan-500/30 rounded p-2 text-cyan-300 focus:outline-none focus:border-cyan-400">
+                                <option value="xlsx">Excel Workbook (.xlsx)</option>
+                                <option value="csv">Comma-Separated Values (.csv)</option>
+                                <option value="parquet">Apache Parquet (.parquet)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-400 mb-1">Sheet Selection Mode</label>
+                            <select name="sheet_mode" class="w-full bg-gray-800 border border-cyan-500/30 rounded p-2 text-cyan-300 focus:outline-none focus:border-cyan-400">
+                                <option value="first">First Sheet Only</option>
+                                <option value="all">All Sheets Combined</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-400 mb-1">Deduplication Rule</label>
+                            <select name="dedup_mode" class="w-full bg-gray-800 border border-cyan-500/30 rounded p-2 text-cyan-300 focus:outline-none focus:border-cyan-400">
+                                <option value="full-row">Full Row Match (Any Duplicate)</option>
+                                <option value="off">Disabled (Keep All Rows)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-400 mb-1">Keep Preference</label>
+                            <select name="keep_option" class="w-full bg-gray-800 border border-cyan-500/30 rounded p-2 text-cyan-300 focus:outline-none focus:border-cyan-400">
+                                <option value="first">Keep First Occurrence</option>
+                                <option value="last">Keep Last Occurrence</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-cyan-500/10 space-y-2 text-xs">
+                        <label class="flex items-center space-x-2 text-gray-300 cursor-pointer">
+                            <input type="checkbox" name="normalize_headers" value="1" checked class="rounded bg-gray-800 border-cyan-500/30 text-cyan-500 focus:ring-0">
+                            <span>Enable Header Normalization & Alias Mapping (lowercase, strip whitespace, map aliases)</span>
+                        </label>
+                        <label class="flex items-center space-x-2 text-gray-300 cursor-pointer">
+                            <input type="checkbox" name="generate_audit" value="1" checked class="rounded bg-gray-800 border-cyan-500/30 text-cyan-500 focus:ring-0">
+                            <span>Compile Detailed Telemetry & Audit Report</span>
+                        </label>
+                    </div>
                 </div>
 
                 <button type="submit" id="submitBtn" class="w-full bg-cyan-600 hover:bg-cyan-500 text-gray-950 font-bold py-3 px-4 rounded transition shadow-lg tracking-wider uppercase text-xs">
-                    Initialize Data Merge
+                    Initialize Enterprise Data Merge
                 </button>
             </form>
 
@@ -83,7 +139,7 @@ if ($isLoggedIn) {
                 <div class="absolute inset-0 bg-gradient-to-b from-cyan-500/5 to-transparent pointer-events-none scanline"></div>
                 
                 <div class="flex justify-between items-center border-b border-cyan-500/30 pb-3 mb-4">
-                    <span class="text-cyan-400 text-xs font-bold tracking-widest uppercase">[ File Recovery in Progress ]</span>
+                    <span class="text-cyan-400 text-xs font-bold tracking-widest uppercase">[ Secure Pipeline in Progress ]</span>
                     <span class="text-cyan-300 text-xs animate-pulse">● ACTIVE</span>
                 </div>
 
@@ -148,54 +204,12 @@ if ($isLoggedIn) {
         </div>
         <?php endif; ?>
 
-        <div class="bg-gray-800/80 border border-cyan-500/30 p-6 rounded-xl shadow-xl">
-            <h3 class="text-sm font-semibold mb-2 text-cyan-400 uppercase tracking-wide">Feedback & Rating Terminal</h3>
-            <p class="text-xs text-gray-400 mb-4">Leave a rating and comment about your experience with ExcelMerger Pro.</p>
-
-            <?php if(isset($_GET['feedback']) &&$_GET['feedback'] === 'success'): ?>
-                <div class="mb-4 bg-green-950/50 border border-green-500 text-green-300 p-3 rounded text-xs">
-                    >> Feedback submitted successfully. Thank you!
-                </div>
-            <?php endif; ?>
-
-            <form action="upload.php" method="POST" class="space-y-4">
-                <input type="hidden" name="action" value="submit_feedback">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-xs text-cyan-300 mb-1">YOUR NAME</label>
-                        <input type="text" name="feedback_name" placeholder="Anonymous" class="w-full bg-gray-900 border border-cyan-500/30 rounded px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-cyan-400">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-cyan-300 mb-1">EMAIL ADDRESS</label>
-                        <input type="email" name="feedback_email" placeholder="you@example.com" class="w-full bg-gray-900 border border-cyan-500/30 rounded px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-cyan-400">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-cyan-300 mb-1">RATING</label>
-                        <select name="feedback_rating" class="w-full bg-gray-900 border border-cyan-500/30 rounded px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-cyan-400">
-                            <option value="5">⭐⭐⭐⭐⭐ (5/5)</option>
-                            <option value="4">⭐⭐⭐⭐ (4/5)</option>
-                            <option value="3">⭐⭐⭐ (3/5)</option>
-                            <option value="2">⭐⭐ (2/5)</option>
-                            <option value="1">⭐ (1/5)</option>
-                        </select>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs text-cyan-300 mb-1">COMMENTS / NOTES</label>
-                    <textarea name="feedback_comment" rows="2" required placeholder="Write your feedback here..." class="w-full bg-gray-900 border border-cyan-500/30 rounded px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-cyan-400"></textarea>
-                </div>
-                <button type="submit" class="bg-gray-700 hover:bg-gray-600 text-cyan-300 font-bold px-4 py-2 rounded text-xs uppercase transition border border-cyan-500/30">
-                    Submit Feedback
-                </button>
-            </form>
-        </div>
-
     </div>
 
     <script>
         function showTerminalLoader() {
             document.getElementById('submitBtn').disabled = true;
-            document.getElementById('submitBtn').innerText = 'Processing...';
+            document.getElementById('submitBtn').innerText = 'Processing Pipeline...';
             document.getElementById('terminalLoader').classList.remove('hidden');
 
             let progress = 0;
@@ -207,7 +221,7 @@ if ($isLoggedIn) {
                 "Status: Scanning headers across files...",
                 "Status: Re-sequencing file blocks...",
                 "Status: Aligning master columns...",
-                "Status: Compiling final spreadsheet..."
+                "Status: Compiling final dataset..."
             ];
 
             const bar = document.getElementById('progressBar');

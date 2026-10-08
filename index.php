@@ -64,7 +64,7 @@ if ($isLoggedIn) {
                         </div>
                     </div>
                     <div class="mt-4">
-                        <a href="outputs/<?= htmlspecialchars($_GET['file'] ?? '') ?>" class="inline-block bg-green-600 hover:bg-green-500 text-gray-950 font-bold px-5 py-2.5 rounded text-xs tracking-wider uppercase transition shadow">Download Master XLSX</a>
+                        <a href="download.php?token=<?= htmlspecialchars($_GET['token'] ?? '') ?>" class="inline-block bg-green-600 hover:bg-green-500 text-gray-950 font-bold px-5 py-2.5 rounded text-xs tracking-wider uppercase transition shadow">Download Master File (Secure)</a>
                     </div>
                 </div>
             <?php endif; ?>

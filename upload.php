@@ -26,11 +26,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['zip_file'])) {
     if (move_uploaded_file($_FILES['zip_file']['tmp_name'], $zipPath)) {
         $pythonScript = __DIR__ . '/python_scripts/merger.py';
         
-        // Command execution passing format arguments
+        // Command execution passing format arguments[cite: 10]
         $command = escapeshellcmd("python \"$pythonScript\" \"$zipPath\" \"$outputPath\" \"$exportFormat\"");
         $output = shell_exec($command . " 2>&1");
 
-        @unlink($zipPath);
+        @unlink($zipPath); //[cite: 10]
 
         $data = json_decode(trim($output), true);
 

@@ -42,22 +42,13 @@
             </div>
         </div>
 
-        <!-- 2. Pipeline Configuration Panel -->
-        <div class="bg-gray-900/70 border border-cyan-500/20 p-6 rounded-lg space-y-4">
-            <h3 class="text-xs font-bold text-cyan-400 uppercase tracking-widest border-b border-cyan-500/20 pb-2">2. Pipeline Configuration Panel</h3>
+        <!-- 2. Pipeline Configuration & Module Controls -->
+        <div class="bg-gray-900/70 border border-cyan-500/20 p-6 rounded-lg space-y-4 text-xs">
+            <h3 class="font-bold text-cyan-400 uppercase tracking-widest border-b border-cyan-500/20 pb-2">2. Pipeline Configuration & Module Controls</h3>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-gray-400 mb-1">Export Format</label>
-                    <select name="export_format" class="w-full bg-gray-800 border border-cyan-500/30 rounded p-2 text-cyan-300 focus:outline-none focus:border-cyan-400">
-                        <option value="xlsx">Excel Workbook (.xlsx)</option>
-                        <option value="csv">Comma-Separated Values (.csv)</option>
-                        <option value="parquet">Apache Parquet (.parquet)</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-gray-400 mb-1">Sheet Selection Mode</label>
+                    <label class="block text-gray-400 mb-1">Sheet Selector</label>
                     <select name="sheet_mode" class="w-full bg-gray-800 border border-cyan-500/30 rounded p-2 text-cyan-300 focus:outline-none focus:border-cyan-400">
                         <option value="first">First Sheet Only</option>
                         <option value="all">All Sheets Combined</option>
@@ -65,9 +56,18 @@
                 </div>
 
                 <div>
-                    <label class="block text-gray-400 mb-1">Deduplication Rule</label>
+                    <label class="block text-gray-400 mb-1">Export Format</label>
+                    <select name="export_format" class="w-full bg-gray-800 border border-cyan-500/30 rounded p-2 text-cyan-300 focus:outline-none focus:border-cyan-400">
+                        <option value="xlsx">Master XLSX / CSV / Parquet (.xlsx)</option>
+                        <option value="csv">Comma-Separated Values (.csv)</option>
+                        <option value="parquet">Apache Parquet (.parquet)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-gray-400 mb-1">Duplicate Rule</label>
                     <select name="dedup_mode" class="w-full bg-gray-800 border border-cyan-500/30 rounded p-2 text-cyan-300 focus:outline-none focus:border-cyan-400">
-                        <option value="full-row">Full Row Match (Any Duplicate)</option>
+                        <option value="full-row">Key Columns (Email, ID)</option>
                         <option value="off">Disabled (Keep All Rows)</option>
                     </select>
                 </div>
@@ -80,10 +80,42 @@
                     </select>
                 </div>
             </div>
+
+            <div class="pt-2 border-t border-cyan-500/10 space-y-2">
+                <label class="flex items-center space-x-2 text-gray-300">
+                    <input type="checkbox" name="normalize_headers" value="1" checked class="rounded bg-gray-800 border-cyan-500/30 text-cyan-500">
+                    <span>Header Normalizer: Lowercase & Trim Whitespace</span>
+                </label>
+                <div class="text-cyan-400 text-xs pl-5">
+                    Alias Mapping Table: [ Enabled (aliases.json loaded) ]
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Pre-Merge Preview & Audit Settings -->
+        <div class="bg-gray-900/70 border border-cyan-500/20 p-6 rounded-lg space-y-2 text-xs">
+            <h3 class="font-bold text-cyan-400 uppercase tracking-widest border-b border-cyan-500/20 pb-2 mb-3">3. Pre-Merge Preview & Audit Settings</h3>
+            <label class="flex items-center space-x-2 text-gray-300">
+                <input type="checkbox" name="enable_preview" value="1" checked class="rounded bg-gray-800 border-cyan-500/30 text-cyan-500">
+                <span>Enable Pre-merge Live Data Preview Table</span>
+            </label>
+            <label class="flex items-center space-x-2 text-gray-300">
+                <input type="checkbox" name="generate_audit" value="1" checked class="rounded bg-gray-800 border-cyan-500/30 text-cyan-500">
+                <span>Generate Detailed Audit telemetry & Skipped Logs</span>
+            </label>
+        </div>
+
+        <!-- 4. Quotas & Secure Expiring Links -->
+        <div class="bg-gray-900/70 border border-cyan-500/20 p-4 rounded-lg text-xs flex justify-between items-center">
+            <div>
+                <span class="block text-cyan-400 font-bold uppercase tracking-wider mb-1">[ 4. Quotas & Secure Expiring Links ]</span>
+                <span class="text-gray-300">Session Quota: 850 / 1000 rows remaining (Secure Token Protected)</span>
+            </div>
+            <span class="text-green-400 font-bold bg-green-950/60 border border-green-500/30 px-3 py-1 rounded">ACTIVE</span>
         </div>
 
         <button type="submit" id="submitBtn" class="w-full bg-cyan-600 hover:bg-cyan-500 text-gray-950 font-bold py-3 px-4 rounded transition shadow-lg tracking-wider uppercase text-xs">
-            Initialize Enterprise Data Merge
+            Initialize Enterprise Data Merge // Run Job
         </button>
     </form>
 

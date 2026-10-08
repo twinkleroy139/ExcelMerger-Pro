@@ -8,6 +8,9 @@ from normalizer import normalize_columns
 from deduplicator import apply_deduplication
 from sheet_selector import load_excel_sheets
 from exporter import export_master_dataframe
+from previewer import translate_error_message
+
+
 
 
 def merge_excel_zip(zip_path, output_path):
@@ -117,7 +120,8 @@ def merge_excel_zip(zip_path, output_path):
         print(json.dumps(stats))
 
     except Exception as e:
-        print(json.dumps({"status": "error", "message": str(e)}))
+        friendly_msg = translate_error_message(e)
+        print(json.dumps({"status": "error", "message": friendly_msg}))
         sys.exit(1)
     finally:
         for root, dirs, files in os.walk(extract_dir, topdown=False):

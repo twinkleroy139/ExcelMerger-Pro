@@ -1,9 +1,9 @@
 <?php
 // upload.php
 require_once __DIR__ . '/includes/auth.php';
-set_time_limit(0); // Allow script to run indefinitely for massive file batches
+set_time_limit(0); // Allow script to run indefinitely for massive file batches[cite: 5]
 
-$userId = getCurrentUserId(); // null if guest, integer if logged in
+$userId = getCurrentUserId(); // null if guest, integer if logged in[cite: 5]
 
 // Handle Feedback Submission (if posted from dashboard)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'submit_feedback') {
@@ -34,19 +34,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['zip_file'])) {
     $outputFileName = 'Master_Output_' . time() . '.xlsx';
     $outputPath = $outputDir . $outputFileName;
 
+    // Grab export format from form request (defaults to 'xlsx')
+    $exportFormat = $_POST['export_format'] ?? 'xlsx';
+
     if (move_uploaded_file($_FILES['zip_file']['tmp_name'], $zipPath)) {
         $pythonScript = __DIR__ . '/python_scripts/merger.py';
         
-        $command = escapeshellcmd("python \"$pythonScript\" \"$zipPath\" \"$outputPath\"");
+        // Pass zipPath, outputPath, and exportFormat as command-line arguments to Python
+        $command = escapeshellcmd("python \"$pythonScript\" \"$zipPath\" \"$outputPath\" \"$exportFormat\"");
         $output = shell_exec($command . " 2>&1");
 
-        @unlink($zipPath); // Clean up temporary zip archive
+        @unlink($zipPath); // Clean up temporary zip archive[cite: 5]
 
         $data = json_decode(trim($output), true);
 
         if ($data && isset($data['status']) && $data['status'] === 'success') {
             
-            // Only save history if the user is logged in (User-isolated storage)
+            // Only save history if the user is logged in (User-isolated storage)[cite: 5]
             if ($userId) {
                 global $pdo;
                 $logStmt = $pdo->prepare("INSERT INTO history (user_id, total_files, input_rows, output_rows, output_file) VALUES (?, ?, ?, ?, ?)");

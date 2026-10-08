@@ -7,6 +7,7 @@ import gc
 from normalizer import normalize_columns
 from deduplicator import apply_deduplication
 from sheet_selector import load_excel_sheets
+from exporter import export_master_dataframe
 
 
 def merge_excel_zip(zip_path, output_path):
@@ -95,8 +96,11 @@ def merge_excel_zip(zip_path, output_path):
         # Drop completely empty rows
         master_df.dropna(how='all', inplace=True)
 
-        # Write out final combined results to Excel using openpyxl engine
-        master_df.to_excel(output_path, index=False)
+        # Determine export format from command line arguments (optional 3rd argument, default 'xlsx')
+        export_fmt = sys.argv[3] if len(sys.argv) > 3 else 'xlsx'
+        
+        # Export via modular helper
+        final_output_filename = export_master_dataframe(master_df, output_path, export_format=export_fmt)
 
         # Track skipped files during the loop if exceptions occur:
         # Inside the except Exception block of file processing, append to a skipped_files list:
@@ -108,7 +112,7 @@ def merge_excel_zip(zip_path, output_path):
             "input_rows": total_input_rows,
             "output_rows": len(master_df),
             "duplicates_removed": max(0, total_input_rows - len(master_df)),
-            "output_file": os.path.basename(output_path)
+            "output_file": final_output_filename
         }
         print(json.dumps(stats))
 

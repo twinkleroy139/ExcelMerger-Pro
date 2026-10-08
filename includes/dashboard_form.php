@@ -67,7 +67,7 @@
                 <div>
                     <label class="block text-gray-400 mb-1">Duplicate Rule</label>
                     <select name="dedup_mode" class="w-full bg-gray-800 border border-cyan-500/30 rounded p-2 text-cyan-300 focus:outline-none focus:border-cyan-400">
-                        <option value="full-row">Key Columns (Email, ID)</option>
+                        <option value="full-row">Full Row Match (Safe for Any Schema)</option>
                         <option value="off">Disabled (Keep All Rows)</option>
                     </select>
                 </div>

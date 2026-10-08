@@ -10,9 +10,6 @@ from sheet_selector import load_excel_sheets
 from exporter import export_master_dataframe
 from previewer import translate_error_message
 
-
-
-
 def merge_excel_zip(zip_path, output_path):
     extract_dir = os.path.join(os.path.dirname(output_path), 'extracted_files')
     os.makedirs(extract_dir, exist_ok=True)
@@ -36,8 +33,6 @@ def merge_excel_zip(zip_path, output_path):
         total_input_rows = 0
         file_dataframes = []
         master_columns = []
-
-        
 
         # Single-pass reading: Collect dataframes from either Excel or CSV dynamically
         for file in all_files:
@@ -77,8 +72,6 @@ def merge_excel_zip(zip_path, output_path):
             except Exception:
                 continue
 
-
-
         if not file_dataframes:
             print(json.dumps({"status": "error", "message": "Could not extract any valid data from the files."}))
             sys.exit(1)
@@ -93,21 +86,23 @@ def merge_excel_zip(zip_path, output_path):
         del aligned_dfs
         gc.collect()
 
-        # Apply Advanced Deduplication
-        master_df = apply_deduplication(master_df, mode='full-row', keep_option='first')
+        # Read parameters from command line arguments
+        export_fmt = sys.argv[3] if len(sys.argv) > 3 else 'xlsx'
+        dedup_mode = sys.argv[4] if len(sys.argv) > 4 else 'full-row'
+        dedup_keys_raw = sys.argv[5] if len(sys.argv) > 5 else ''
+        keep_option = sys.argv[6] if len(sys.argv) > 6 else 'first'
+        
+        # Parse comma-separated keys into a list and normalize them
+        key_columns = [k.strip().lower() for k in dedup_keys_raw.split(',') if k.strip()]
+
+        # Apply Advanced Deduplication with custom parameters
+        master_df = apply_deduplication(master_df, mode=dedup_mode, key_columns=key_columns, keep_option=keep_option)
 
         # Drop completely empty rows
         master_df.dropna(how='all', inplace=True)
-
-        # Determine export format from command line arguments (optional 3rd argument, default 'xlsx')
-        export_fmt = sys.argv[3] if len(sys.argv) > 3 else 'xlsx'
         
         # Export via modular helper
         final_output_filename = export_master_dataframe(master_df, output_path, export_format=export_fmt)
-
-        # Track skipped files during the loop if exceptions occur:
-        # Inside the except Exception block of file processing, append to a skipped_files list:
-        # skipped_files.append({"file": os.path.basename(file), "reason": str(e)})
 
         stats = {
             "status": "success",

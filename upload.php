@@ -22,15 +22,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['zip_file'])) {
     $exportFormat = $_POST['export_format'] ?? 'xlsx';
     $sheetMode = $_POST['sheet_mode'] ?? 'first';
     $dedupMode = $_POST['dedup_mode'] ?? 'full-row';
+    $dedupKeys = $_POST['dedup_keys'] ?? '';
+    $keepOption = $_POST['keep_option'] ?? 'first';
 
     if (move_uploaded_file($_FILES['zip_file']['tmp_name'], $zipPath)) {
         $pythonScript = __DIR__ . '/python_scripts/merger.py';
         
-        // Command execution passing format arguments[cite: 10]
-        $command = escapeshellcmd("python \"$pythonScript\" \"$zipPath\" \"$outputPath\" \"$exportFormat\"");
+        // Command execution passing format, dedup mode, keys, and keep preference arguments
+        $escapedDedupKeys = escapeshellarg($dedupKeys);
+        $command = escapeshellcmd("python \"$pythonScript\" \"$zipPath\" \"$outputPath\" \"$exportFormat\" \"$dedupMode\" $escapedDedupKeys \"$keepOption\"");
         $output = shell_exec($command . " 2>&1");
 
-        @unlink($zipPath); //[cite: 10]
+        @unlink($zipPath);[cite: 10]
 
         $data = json_decode(trim($output), true);
 

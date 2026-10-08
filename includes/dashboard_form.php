@@ -66,8 +66,9 @@
 
                 <div>
                     <label class="block text-gray-400 mb-1">Duplicate Rule</label>
-                    <select name="dedup_mode" class="w-full bg-gray-800 border border-cyan-500/30 rounded p-2 text-cyan-300 focus:outline-none focus:border-cyan-400">
-                        <option value="full-row">Full Row Match (Safe for Any Schema)</option>
+                    <select name="dedup_mode" id="dedupModeSelect" onchange="toggleDedupInput()" class="w-full bg-gray-800 border border-cyan-500/30 rounded p-2 text-cyan-300 focus:outline-none focus:border-cyan-400">
+                        <option value="full-row">Full Row Match (Check Everything)</option>
+                        <option value="keys">Specific Header Column (Key-based)</option>
                         <option value="off">Disabled (Keep All Rows)</option>
                     </select>
                 </div>
@@ -78,6 +79,12 @@
                         <option value="first">Keep First Occurrence</option>
                         <option value="last">Keep Last Occurrence</option>
                     </select>
+                </div>
+
+                <div id="dedupKeysContainer" class="hidden col-span-2">
+                    <label class="block text-gray-400 mb-1">Target Header Column(s) for Duplication</label>
+                    <input type="text" name="dedup_keys" placeholder="Enter header names separated by comma (e.g., email, id, sku)" class="w-full bg-gray-800 border border-cyan-500/30 rounded p-2 text-cyan-300 focus:outline-none focus:border-cyan-400">
+                    <span class="text-gray-500 text-[10px] mt-1 block">Matches normalized header names (lowercased, stripped of spaces).</span>
                 </div>
             </div>
 
@@ -151,3 +158,15 @@
         </div>
     </div>
 </div>
+
+<script>
+function toggleDedupInput() {
+    const mode = document.getElementById('dedupModeSelect').value;
+    const container = document.getElementById('dedupKeysContainer');
+    if (mode === 'keys') {
+        container.classList.remove('hidden');
+    } else {
+        container.classList.add('hidden');
+    }
+}
+</script>

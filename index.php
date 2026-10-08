@@ -18,13 +18,13 @@ if ($isLoggedIn) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ExcelMerger Pro - Upgraded Cyberpunk Dashboard</title>
+    <title>ExcelMerger Pro - Enterprise Cyberpunk Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-gray-900 min-h-screen text-gray-100 font-mono">
     <nav class="bg-gray-800 border-b border-cyan-500/30 text-cyan-400 p-4 shadow flex justify-between items-center px-8">
-        <h1 class="text-xl font-bold tracking-wider">EXCEL_MERGER_PRO // v3.0 [ENTERPRISE]</h1>
+        <h1 class="text-xl font-bold tracking-wider">EXCEL_MERGER_PRO // v3.1 [PREVIEW ENGINE]</h1>
         <div>
             <?php if($isLoggedIn): ?>
                 <span class="mr-4 text-xs">USER: <strong><?= htmlspecialchars($username) ?></strong></span>
@@ -40,7 +40,7 @@ if ($isLoggedIn) {
         
         <div class="bg-gray-800/80 border border-cyan-500/30 p-8 rounded-xl shadow-2xl backdrop-blur">
             <h2 class="text-xl font-bold mb-2 text-cyan-400 uppercase tracking-wide">Enterprise Batch Processing Terminal</h2>
-            <p class="text-gray-400 mb-6 text-xs leading-relaxed">Configure your merge parameters below. The modular engine will normalize headers, apply custom deduplication rules, process sheet layouts, and compile your master dataset securely.</p>
+            <p class="text-gray-400 mb-6 text-xs leading-relaxed">Configure your merge parameters below. Upload a ZIP archive to trigger live header inspection and pre-merge structural diagnostics.</p>
 
             <?php if(isset($_GET['success'])): ?>
                 <div class="mb-6 bg-gray-900 border border-green-500/50 text-green-300 p-6 rounded-lg">
@@ -69,13 +69,13 @@ if ($isLoggedIn) {
                 </div>
             <?php endif; ?>
 
-            <form action="upload.php" method="POST" enctype="multipart/form-data" class="space-y-6" onsubmit="showTerminalLoader()">
+            <form id="mergeForm" action="upload.php" method="POST" enctype="multipart/form-data" class="space-y-6" onsubmit="showTerminalLoader()">
                 
                 <!-- 1. Payload Upload Zone -->
                 <div class="space-y-2">
                     <label class="block text-xs text-cyan-300 font-bold uppercase tracking-wider">1. Payload Archive (.zip)</label>
                     <div class="border-2 border-dashed border-cyan-500/30 p-6 rounded-lg text-center bg-gray-900/50 hover:border-cyan-400 transition">
-                        <input type="file" name="zip_file" accept=".zip" required class="block w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-bold file:bg-cyan-950 file:text-cyan-300 hover:file:bg-cyan-900 cursor-pointer">
+                        <input type="file" id="zipFileInput" name="zip_file" accept=".zip" required class="block w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-bold file:bg-cyan-950 file:text-cyan-300 hover:file:bg-cyan-900 cursor-pointer">
                     </div>
                 </div>
 
@@ -117,17 +117,6 @@ if ($isLoggedIn) {
                             </select>
                         </div>
                     </div>
-
-                    <div class="pt-2 border-t border-cyan-500/10 space-y-2 text-xs">
-                        <label class="flex items-center space-x-2 text-gray-300 cursor-pointer">
-                            <input type="checkbox" name="normalize_headers" value="1" checked class="rounded bg-gray-800 border-cyan-500/30 text-cyan-500 focus:ring-0">
-                            <span>Enable Header Normalization & Alias Mapping (lowercase, strip whitespace, map aliases)</span>
-                        </label>
-                        <label class="flex items-center space-x-2 text-gray-300 cursor-pointer">
-                            <input type="checkbox" name="generate_audit" value="1" checked class="rounded bg-gray-800 border-cyan-500/30 text-cyan-500 focus:ring-0">
-                            <span>Compile Detailed Telemetry & Audit Report</span>
-                        </label>
-                    </div>
                 </div>
 
                 <button type="submit" id="submitBtn" class="w-full bg-cyan-600 hover:bg-cyan-500 text-gray-950 font-bold py-3 px-4 rounded transition shadow-lg tracking-wider uppercase text-xs">
@@ -164,6 +153,22 @@ if ($isLoggedIn) {
 
                 <div class="w-full bg-gray-900 border border-cyan-500/40 h-3 p-0.5 rounded-sm">
                     <div id="progressBar" class="bg-cyan-400 h-full w-0 transition-all duration-300 rounded-xs shadow-[0_0_10px_#22d3ee]"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pre-Merge Preview Modal -->
+        <div id="previewModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-gray-800 border border-cyan-500 w-full max-w-2xl rounded-xl p-6 shadow-2xl relative space-y-4">
+                <div class="flex justify-between items-center border-b border-cyan-500/30 pb-3">
+                    <h3 class="text-cyan-400 text-sm font-bold uppercase tracking-wider">[ Pre-Merge Structural Preview ]</h3>
+                    <button onclick="closePreviewModal()" class="text-gray-400 hover:text-cyan-300 text-sm font-bold">[ &times; ]</button>
+                </div>
+                <div id="previewContent" class="space-y-3 max-h-96 overflow-y-auto text-xs">
+                    <p class="text-cyan-300 animate-pulse">Analyzing payload headers and structure...</p>
+                </div>
+                <div class="flex justify-end pt-3 border-t border-cyan-500/30 space-x-3">
+                    <button onclick="closePreviewModal()" class="bg-gray-700 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded text-xs uppercase tracking-wider">Close Preview</button>
                 </div>
             </div>
         </div>
@@ -207,6 +212,54 @@ if ($isLoggedIn) {
     </div>
 
     <script>
+        // Trigger live pre-merge preview when zip file is selected
+        document.getElementById('zipFileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const modal = document.getElementById('previewModal');
+            const content = document.getElementById('previewContent');
+            modal.classList.remove('hidden');
+            content.innerHTML = '<p class="text-cyan-300 animate-pulse">>> Inspecting archive headers and structure...</p>';
+
+            let formData = new FormData();
+            formData.append('zip_file', file);
+
+            fetch('preview_ajax.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    let html = `<p class="text-green-400 font-bold mb-2">>> ARCHIVE INSPECTION SUCCESSFUL (${data.files.length} files detected):</p>`;
+                    data.files.forEach(f => {
+                        html += `
+                            <div class="bg-gray-900 border border-cyan-500/30 p-3 rounded mb-2">
+                                <div class="text-cyan-300 font-bold mb-1">FILE: ${f.filename}</div>
+                        `;
+                        if (f.error) {
+                            html += `<div class="text-red-400">${f.error}</div>`;
+                        } else {
+                            html += `<div class="text-gray-400 mb-1">Sample Rows Read: ${f.sample_rows}</div>`;
+                            html += `<div class="text-gray-300"><span class="text-cyan-400">Detected Columns:</span> ${f.columns.join(', ')}</div>`;
+                        }
+                        html += `</div>`;
+                    });
+                    content.innerHTML = html;
+                } else {
+                    content.innerHTML = `<p class="text-red-400">>> ERROR: ${data.message || 'Could not parse preview.'}</p>`;
+                }
+            })
+            .catch(err => {
+                content.innerHTML = `<p class="text-red-400">>> SYSTEM ERROR: Failed to communicate with preview server.</p>`;
+            });
+        });
+
+        function closePreviewModal() {
+            document.getElementById('previewModal').classList.add('hidden');
+        }
+
         function showTerminalLoader() {
             document.getElementById('submitBtn').disabled = true;
             document.getElementById('submitBtn').innerText = 'Processing Pipeline...';

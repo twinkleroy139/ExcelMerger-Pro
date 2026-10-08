@@ -65,3 +65,15 @@ def generate_preview_metadata(zip_path):
                 except: pass
             try: os.rmdir(extract_dir)
             except: pass
+
+
+
+
+# Add this at the very bottom of python_scripts/previewer.py if not already present:
+if __name__ == '__main__':
+    import sys
+    if len(sys.argv) > 1:
+        res = generate_preview_metadata(sys.argv[1])
+        print(json.dumps(res))
+    else:
+        print(json.dumps({"status": "error", "message": "Missing zip path argument."}))

@@ -8,15 +8,15 @@ def apply_deduplication(master_df, mode='full-row', key_columns=None, keep_optio
     - keep_option: 'first' or 'last'
     """
     if mode == 'off' or master_df.empty:
-        return master_df[cite: 12]
+        return master_df
     
     if mode == 'full-row':
-        return master_df.drop_duplicates(keep=keep_option)[cite: 12]
+        return master_df.drop_duplicates(keep=keep_option)
     
     if mode == 'keys' and key_columns:
         valid_keys = [col for col in key_columns if col in master_df.columns]
         if valid_keys:
-            return master_df.drop_duplicates(subset=valid_keys, keep=keep_option)[cite: 12]
+            return master_df.drop_duplicates(subset=valid_keys, keep=keep_option)
     
     # Fallback to full-row check if keys are missing or unprovided
-    return master_df.drop_duplicates(keep=keep_option)[cite: 12]
+    return master_df.drop_duplicates(keep=keep_option)

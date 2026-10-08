@@ -44,17 +44,14 @@ def merge_excel_zip(zip_path, output_path):
                         df = pd.read_csv(file, encoding='latin1')
                     dfs_to_process = [df] if not df.empty else []
                 else:
-                    # Use sheet selector helper (Defaulting to 'first' or 'all' sheets)
                     dfs_to_process = load_excel_sheets(file, mode='first')
 
                 for df in dfs_to_process:
                     if df.empty:
                         continue
                     
-                    # Apply Header Normalization & Alias Mapping via modular helper
                     df.columns = normalize_columns(df.columns)
                     
-                    # Filter out duplicate header rows inside data
                     for col in df.columns:
                         df = df[df[col].astype(str).str.strip().str.lower() != col.lower()]
 
@@ -62,7 +59,6 @@ def merge_excel_zip(zip_path, output_path):
                         total_input_rows += len(df)
                         file_dataframes.append(df)
                         
-                        # Track all unique columns across files in order of appearance
                         for col in df.columns:
                             if col not in master_columns:
                                 master_columns.append(col)
@@ -76,12 +72,10 @@ def merge_excel_zip(zip_path, output_path):
             print(json.dumps({"status": "error", "message": "Could not extract any valid data from the files."}))
             sys.exit(1)
 
-        # Reindex all dataframes to match the master column set perfectly before concatenation
         aligned_dfs = [df.reindex(columns=master_columns) for df in file_dataframes]
         del file_dataframes
         gc.collect()
 
-        # Concatenate all into a single master dataframe efficiently
         master_df = pd.concat(aligned_dfs, ignore_index=True)
         del aligned_dfs
         gc.collect()
@@ -92,16 +86,13 @@ def merge_excel_zip(zip_path, output_path):
         dedup_keys_raw = sys.argv[5] if len(sys.argv) > 5 else ''
         keep_option = sys.argv[6] if len(sys.argv) > 6 else 'first'
         
-        # Parse comma-separated keys into a list and normalize them
         key_columns = [k.strip().lower() for k in dedup_keys_raw.split(',') if k.strip()]
 
         # Apply Advanced Deduplication with custom parameters
         master_df = apply_deduplication(master_df, mode=dedup_mode, key_columns=key_columns, keep_option=keep_option)
 
-        # Drop completely empty rows
         master_df.dropna(how='all', inplace=True)
         
-        # Export via modular helper
         final_output_filename = export_master_dataframe(master_df, output_path, export_format=export_fmt)
 
         stats = {
